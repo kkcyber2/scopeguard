@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest -q
+      - name: CLI smoke - refuses an unconsented target
+        run: |
+          scopeguard init --db /tmp/s.db --tenant t1
+          scopeguard allow --db /tmp/s.db --tenant t1 --host example.com
+          scopeguard own --db /tmp/s.db --tenant t1 --host example.com --method dns-txt
+          set +e
+          scopeguard check --db /tmp/s.db --tenant t1 --target app.example.com
+          code=$?
+          set -e
+          echo "exit=$code (expected 2: no consent)"
+          test "$code" -eq 2
