@@ -90,6 +90,13 @@ class Consent:
     policy_version: str
     # Free-text of what they agreed to. Stored so a dispute has a record.
     statement: str = ""
+    # Per-consent validity. 0 means "use the guard's default".
+    #
+    # This exists because without it a caller could write ``--days 7``, have the
+    # CLI print a seven-day expiry, and still get a ninety-day window from the
+    # guard's default. A UI that states an expiry the enforcement layer does
+    # not honour is worse than no UI at all.
+    ttl_s: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -99,6 +106,7 @@ class Consent:
             "asserted_at": self.asserted_at,
             "policy_version": self.policy_version,
             "statement": self.statement,
+            "ttl_s": self.ttl_s,
         }
 
 
@@ -286,7 +294,7 @@ class ScopeGuard:
                     live = [
                         c
                         for c in matching
-                        if 0 <= (now - c.asserted_at) <= self.consent_ttl_s
+                        if 0 <= (now - c.asserted_at) <= (c.ttl_s or self.consent_ttl_s)
                     ]
                     if not live:
                         reasons.append(Deny.CONSENT_EXPIRED)
