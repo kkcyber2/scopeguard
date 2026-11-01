@@ -132,11 +132,12 @@ assert the row survives revocation.
 python -m pytest -q
 ```
 
-**74 passing.** Host normalisation (agrees with ForgeGuard's `normalizeHost`,
-because a guard that normalises differently from the scanner is a guard with a
-bypass), the `.` boundary that stops `notexample.com` matching `example.com`,
-every gate individually, expiry in both directions, stale policy version, the
-private-address matrix, per-consent TTL enforcement, and tenant isolation.
+**78 passing** (54 guard + 24 store). Host normalisation (agrees with ForgeGuard's
+`normalizeHost`, because a guard that normalises differently from the scanner is
+a guard with a bypass), the `.` boundary that stops `notexample.com` matching
+`example.com`, every gate individually, expiry in both directions, stale policy
+version, the private-address matrix, per-consent TTL enforcement, and tenant
+isolation.
 
 ## Limitations
 
